@@ -161,17 +161,6 @@ void read_press_data(void)
 
   pressure = pressureF[0] / 100.0f;
 
-  // Plot PressureCount
-  Serial.print(">pCount:");
-  Serial.println(pressureCount);
-  // Plot vario
-  Serial.print(">vario:");
-  Serial.println((100.0 * vario));
-
-  // Plot alt
-  Serial.print(">alt:");
-  Serial.println(alt);
-
   calc_alt_data(pressure);
   calc_vario();
   calc_acc();
@@ -184,17 +173,6 @@ void read_press_data(void)
   {
     return;
   }
-/*
-    for (int i = 0; i < 4; ++i) {
-        finfo_FTime[i] = finfo_FTime[i + 1];
-        finfo_FBaro[i] = finfo_FBaro[i + 1];
-        finfo_FVario[i] = finfo_FVario[i + 1];
-    }
-
-    finfo_FTime[4] = (float)(millis()) / 1000.0f;
-    finfo_FBaro[4] = alt;
-    finfo_FVario[4] = vario;
-*/
 
     float dtACC = (float)(millis() - tKalman) / 1000.0f;
 
@@ -204,30 +182,10 @@ void read_press_data(void)
 
     hkf.accKalman(dtACC, alt, altVar);
 
-  //      alt_baro = hkf.Altitude();
+
         v_baro = hkf.VerticalSpeed();
         a_baro = hkf.VerticalAcceleration();
-  //      output["h_variance"] = altVariance;
 
-   // Plot  a_baro
-   Serial.print(">a_baro:");
-   Serial.println(1000.0 * a_baro);
-
-   // Plot  v_baro
-   Serial.print(">v_baro:");
-   Serial.println(100.0 * v_baro);
-
-   /*
-   // Plot  alt_baro
-   Serial.print(">alt_baro:");
-   Serial.println(alt_baro);
-   */
-
-   // Plot  altVar
-   Serial.print(">altVar:");
-   Serial.println(100.0 * altVar);
-
-  //  accKalman(dtACC);
 
   for (int i = 0; i < 4; ++i) {
         finfo_vSpeed[i] = finfo_vSpeed[i + 1];
