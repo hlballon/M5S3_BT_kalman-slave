@@ -7,6 +7,23 @@
  * 
  * Based on: https://github.com/mhaberler/BTHomeV2-ESP32-example
  * This header defines object IDs and encoding formats for BTHomeV2
+ * 
+ * ADVERTISEMENT STRUCTURE:
+ * ┌─────────────────┬────────────────────────────────────────────┓
+ * │ BLE Flags       │ 0x06 (LE General Discoverable)            ║
+ * ├─────────────────┼────────────────────────────────────────────╢
+ * │ Service Data    │ UUID(0xFCD2) + Flag(0x40) + Sensor Data   ║
+ * ├─────────────────┼────────────────────────────────────────────╢
+ * │ Scan Response   │ Device Name + Service UUID                 ║
+ * └─────────────────┴────────────────────────────────────────────╨
+ * 
+ * SENSOR DATA FORMAT (Object IDs MUST be in numerical order):
+ * [Object ID][Data Bytes][Object ID][Data Bytes]...
+ * 
+ * ENCODING RULES:
+ * - Multi-byte values are little-endian
+ * - Object IDs must be in ascending numerical order
+ * - Maximum service data payload: ~25 bytes
  */
 
 #ifndef BTHOME_V2_H

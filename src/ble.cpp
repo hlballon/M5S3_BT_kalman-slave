@@ -5,6 +5,17 @@
  * Uses NimBLE 2.2.3+ for efficient BLE stack on ESP32-S3
  * Implements Home Assistant BTHome auto-discovery
  * 
+ * BALLOON TELEMETRY DATA TRANSMITTED:
+ * - Barometric Pressure (hPa) - for altitude calculation
+ * - Altitude (m) - calculated from pressure 
+ * - Vertical Speed (m/s) - climb/descent rate (absolute value)
+ * - Vertical Acceleration (m/s²) - rate of climb change (absolute value)
+ * - Reading Counter - packet sequence number
+ * 
+ * HOME ASSISTANT INTEGRATION:
+ * Device appears as "HLBc-Kalman" with 5 sensor entities.
+ * No manual configuration required - BTHome integration handles discovery.
+ * 
  * Reference: https://github.com/mhaberler/BTHomeV2-ESP32-example
  * 
  * Copyright (C) 2006-2025 www.hlballon.com
@@ -51,7 +62,23 @@ static struct {
 
 /**
  * Build BTHomeV2 compliant sensor data payload
- * Object IDs MUST be in numerical order (low to high)
+ * 
+ * CRITICAL: Object IDs MUST be in numerical order (low to high)
+ * This is a REQUIRED BTHomeV2 specification rule for proper parsing.
+ * 
+ * DATA STRUCTURE (transmitted as service data):
+ * ┌──────┬────────┬────────────────────────────────────────────┐
+ * │ OID  │ Bytes  │ Description                                │
+ * ├──────┼────────┼────────────────────────────────────────────┤
+ * │ 0x04 │ 3      │ Pressure (uint24, 0.01 hPa scale)         │
+ * │ 0x3E │ 4      │ Reading Counter (uint32)                   │
+ * │ 0x41 │ 2      │ Altitude (uint16, 0.1 m scale)             │
+ * │ 0x44 │ 2      │ Vertical Speed (uint16, 0.01 m/s scale)    │
+ * │ 0x51 │ 2      │ Vertical Acceleration (uint16, 0.001 m/s²) │
+ * └──────┴────────┴────────────────────────────────────────────┘
+ * 
+ * Total payload: 15 bytes (well within 25-byte BLE limit)
+ * Home Assistant auto-discovers these as individual sensors.
  */
 static void build_sensor_payload(
     float pressure,
