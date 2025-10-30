@@ -99,3 +99,35 @@ Hex Data: 04 86 1A 01  3E 2A 00 00 00  41 10 27  44 FA 00  51 50 0C
 - **TX Power**: ESP_PWR_LVL_P9 (medium range/battery balance)
 - **Connection Mode**: Non-connectable (advertisement only)
 - **Data Encoding**: Little-endian, per BTHome specification
+
+## Known Issues
+
+### Issue #1: Negative Values Transmission Problem
+
+**Problem**: The current implementation transmits only absolute values for vertical speed and vertical acceleration, losing critical directional information needed for balloon flight analysis.
+
+**Current Behavior**:
+- Vertical speed uses `fabs()` → Always positive (0x44 object, uint16)
+- Vertical acceleration uses `fabs()` → Always positive (0x51 object, uint16)
+- Direction information (climb vs. descent, acceleration vs. deceleration) is lost
+
+**Impact**:
+- Cannot distinguish between ascending (+) and descending (-) motion
+- Cannot differentiate between accelerating upward (+) and downward (-)
+- Home Assistant displays show speed/acceleration magnitude only
+- Flight analysis and balloon control algorithms lose essential state information
+
+**Required Fix**:
+1. **Option A**: Use signed integer BTHome objects (sint16) if available
+2. **Option B**: Add separate direction/state objects (boolean indicators)
+3. **Option C**: Use custom object IDs with signed encoding
+4. **Option D**: Implement offset encoding (add fixed offset to make negative values positive)
+
+**Code Location**: 
+- File: `src/ble.cpp`
+- Function: `build_sensor_payload()`
+- Lines: Speed encoding (~line 75), Acceleration encoding (~line 81)
+
+**Priority**: High - Critical for proper balloon telemetry interpretation
+
+**Status**: Open - Requires design decision on encoding approach
